@@ -245,22 +245,37 @@ export theme
 
 menuentry "FreeBSD macOS Desktop — Install" {
   insmod xzio
+  insmod iso9660
   echo "Loading FreeBSD kernel..."
-  kfreebsd /boot/kernel/kernel
-  kfreebsd_loadenv /boot/device.hints
-  set kFreeBSD.vfs.root.mountfrom="cd9660:/dev/iso9660/FBSDMACOS"
-  set kFreeBSD.kern.geom.label.cd9660.enable=1
-  set kFreeBSD.i915kms_load=YES
-  set kFreeBSD.if_iwlwifi_load=YES
-  set kFreeBSD.desktop_firstboot_enable=YES
+  if [ -f /boot/grub/x86_64-efi/kfreebsd.mod ] || [ -f /boot/grub/i386-pc/kfreebsd.mod ]; then
+    insmod kfreebsd
+    kfreebsd /boot/kernel/kernel
+    kfreebsd_loadenv /boot/device.hints
+    set kFreeBSD.vfs.root.mountfrom="cd9660:/dev/iso9660/FBSDMACOS"
+    set kFreeBSD.kern.geom.label.cd9660.enable=1
+    set kFreeBSD.i915kms_load=YES
+    set kFreeBSD.if_iwlwifi_load=YES
+    set kFreeBSD.desktop_firstboot_enable=YES
+  else
+    insmod multiboot2
+    multiboot2 /boot/kernel/kernel
+    module2 /boot/device.hints
+  fi
 }
 
 menuentry "FreeBSD macOS Desktop — Verbose Boot" {
   insmod xzio
-  kfreebsd /boot/kernel/kernel
-  kfreebsd_loadenv /boot/device.hints
-  set kFreeBSD.vfs.root.mountfrom="cd9660:/dev/iso9660/FBSDMACOS"
-  set kFreeBSD.boot_verbose=YES
+  insmod iso9660
+  if [ -f /boot/grub/x86_64-efi/kfreebsd.mod ] || [ -f /boot/grub/i386-pc/kfreebsd.mod ]; then
+    insmod kfreebsd
+    kfreebsd /boot/kernel/kernel
+    kfreebsd_loadenv /boot/device.hints
+    set kFreeBSD.vfs.root.mountfrom="cd9660:/dev/iso9660/FBSDMACOS"
+    set kFreeBSD.boot_verbose=YES
+  else
+    insmod multiboot2
+    multiboot2 /boot/kernel/kernel
+  fi
 }
 
 menuentry "UEFI Firmware Settings" {
@@ -277,18 +292,21 @@ log "Step 6/7 — Building bootable ISO..."
 
 # Generate EFI image
 mkdir -p "$WORK/efi/EFI/BOOT"
+# Check which modules are available (kfreebsd is FreeBSD-specific, not in Debian grub)
+EFI_MODS="all_video boot cat chain configfile echo efifwsetup efinet ext2 fat font gfxmenu gfxterm gzio halt hfsplus iso9660 jpeg linux loadenv loopback ls lsefi lsefimmap lsefisystab memdisk minicmd multiboot multiboot2 normal part_apple part_gpt part_msdos png reboot search search_fs_file search_fs_uuid search_label sleep test true xzio"
+# Add kfreebsd only if available
+if [ -f /usr/lib/grub/x86_64-efi/kfreebsd.mod ]; then
+    EFI_MODS="$EFI_MODS kfreebsd"
+    log "  kfreebsd.mod found — FreeBSD native boot enabled"
+else
+    warn "  kfreebsd.mod not found — using multiboot2 fallback"
+fi
+
 grub-mkimage \
     --format=x86_64-efi \
     --output="$WORK/efi/EFI/BOOT/BOOTX64.EFI" \
     --prefix=/boot/grub \
-    all_video boot btrfs cat chain configfile echo \
-    efifwsetup efinet ext2 fat font gfxmenu gfxterm \
-    gzio halt hfsplus iso9660 jpeg linux loadenv \
-    loopback ls lsefi lsefimmap lsefisystab lssal \
-    memdisk minicmd normal part_apple part_gpt part_msdos \
-    password_pbkdf2 png reboot search search_fs_file \
-    search_fs_uuid search_label sleep test true zfs \
-    xzio kfreebsd
+    $EFI_MODS
 
 # Create EFI FAT image
 dd if=/dev/zero of="$WORK/efi.img" bs=1M count=4 2>/dev/null
@@ -297,12 +315,16 @@ mmd -i "$WORK/efi.img" ::/EFI ::/EFI/BOOT
 mcopy -i "$WORK/efi.img" "$WORK/efi/EFI/BOOT/BOOTX64.EFI" ::/EFI/BOOT/
 
 # Generate BIOS core image
+BIOS_MODS="biosdisk iso9660 normal search xzio all_video gfxterm gfxmenu png jpeg font multiboot multiboot2"
+if [ -f /usr/lib/grub/i386-pc/kfreebsd.mod ]; then
+    BIOS_MODS="$BIOS_MODS kfreebsd"
+fi
+
 grub-mkimage \
     --format=i386-pc \
     --output="$WORK/core.img" \
     --prefix=/boot/grub \
-    biosdisk iso9660 normal search xzio kfreebsd \
-    all_video gfxterm gfxmenu png jpeg font
+    $BIOS_MODS
 
 cat /usr/lib/grub/i386-pc/cdboot.img "$WORK/core.img" > "$WORK/boot.img"
 
