@@ -56,9 +56,21 @@ done
 log "Step 2/7 — Extracting FreeBSD base into rootfs..."
 for dist in base.txz lib32.txz kernel.txz; do
     log "  Extracting $dist..."
-    tar -xJf "$DIST/$dist" -C "$ROOTFS" --no-same-owner 2>/dev/null || true
+    # Validate file size — re-download if empty/corrupt
+    FSIZE=$(stat -c%s "$DIST/$dist" 2>/dev/null || echo 0)
+    if [ "$FSIZE" -lt 1048576 ]; then
+        warn "  $dist seems corrupt (${FSIZE} bytes) — re-downloading..."
+        rm -f "$DIST/$dist"
+        curl -# -o "$DIST/$dist" "$FREEBSD_MIRROR/$dist" || \
+            wget -q --show-progress -O "$DIST/$dist" "$FREEBSD_MIRROR/$dist" || \
+            die "Failed to download $dist"
+    fi
+    tar -xJf "$DIST/$dist" -C "$ROOTFS" --no-same-owner || die "Failed to extract $dist"
 done
-ok "FreeBSD rootfs extracted"
+# Verify rootfs has essential dirs
+[ -d "$ROOTFS/boot" ] || die "rootfs/boot missing after extraction — FreeBSD tarballs may be corrupt"
+[ -d "$ROOTFS/etc"  ] || die "rootfs/etc missing after extraction"
+ok "FreeBSD rootfs extracted ($(du -sh $ROOTFS | cut -f1))"
 
 # ============================================================
 # STEP 3: Copy our project into rootfs
@@ -100,6 +112,7 @@ RCEOF
 chmod +x "$ROOTFS/etc/rc.d/desktop_firstboot"
 
 # Base rc.conf (minimal for boot + network)
+mkdir -p "$ROOTFS/etc"
 cat >> "$ROOTFS/etc/rc.conf" << 'RCCONF'
 hostname="freebsd-macos"
 ifconfig_em0="DHCP"
@@ -110,6 +123,7 @@ desktop_firstboot_enable="YES"
 RCCONF
 
 # loader.conf (kernel modules for live session)
+mkdir -p "$ROOTFS/boot"
 cat >> "$ROOTFS/boot/loader.conf" << 'LOADERCONF'
 autoboot_delay="3"
 loader_logo="none"
