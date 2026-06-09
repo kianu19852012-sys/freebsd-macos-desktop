@@ -1,0 +1,55 @@
+# ============================================================
+#  GRUB2 Theme — FreeBSD macOS Desktop
+#  Style: macOS Sonoma / Big Sur — clean, minimal, premium
+# ============================================================
+
+# Global settings
+title-text:      ""
+desktop-image:   "splash.png"
+desktop-color:   "#f5f5f7"
+terminal-font:   "Inter Regular 14"
+terminal-box:    "terminal_box_*.png"
+terminal-left:   "0"
+terminal-top:    "0"
+terminal-width:  "100%"
+terminal-height: "100%"
+
+# ---- Boot menu ----
++ boot_menu {
+  left   = 50% - 160
+  top    = 58%
+  width  = 320
+  height = 120
+  item_font       = "Inter Regular 13"
+  item_color      = "#3a3a3c"
+  selected_item_font  = "Inter Semi-Bold 13"
+  selected_item_color = "#ffffff"
+  item_height     = 34
+  item_padding    = 14
+  item_spacing    = 2
+  selected_item_pixmap_style = "select_*.png"
+  scrollbar       = false
+}
+
+# ---- Progress bar (thin, rounded, macOS-style) ----
++ progress_bar {
+  id         = "__timeout__"
+  left       = 50% - 120
+  top        = 78%
+  width      = 240
+  height     = 4
+  show_text  = false
+  bar_style  = "progress_bar_*.png"
+  highlight_style = "progress_bar_hl_*.png"
+}
+
+# ---- OS label ----
++ label {
+  left  = 50% - 100
+  top   = 82%
+  width = 200
+  align = "center"
+  text  = "FreeBSD macOS Desktop"
+  font  = "Inter Regular 11"
+  color = "#8e8e93"
+}

@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  iso-builder:
+    build:
+      context: ..           # project root (freebsd-macos/)
+      dockerfile: docker-builder/Dockerfile
+    image: fbsd-macos-iso-builder:latest
+    container_name: fbsd-iso-build
+    volumes:
+      # ISO lands here on your host machine
+      - ./output:/output
+      # Cache FreeBSD dist files between builds (saves re-downloading)
+      - fbsd-dist-cache:/build/dists
+    # Run with elevated privileges (needed for loop mounts in ISO creation)
+    privileged: true
+
+volumes:
+  fbsd-dist-cache:
+    name: fbsd-dist-cache

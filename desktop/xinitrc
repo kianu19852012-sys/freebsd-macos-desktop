@@ -1,0 +1,41 @@
+#!/bin/sh
+# ============================================================
+#  X11 session startup — FreeBSD macOS-like Desktop
+# ============================================================
+
+# Set DPI
+xrandr --dpi 96
+
+# Apply GTK/cursor settings
+xrdb -merge ~/.Xresources 2>/dev/null || true
+
+# Compositor (blur + shadows — must start first)
+picom --config ~/.config/picom/picom.conf --daemon
+
+# Wallpaper
+feh --bg-scale ~/Pictures/Wallpapers/WhiteSur-light.jpg \
+  || feh --bg-scale /usr/local/share/wallpapers/WhiteSur-light.jpg
+
+# Top bar (macOS menu bar)
+tint2 -c ~/.config/tint2/macos.tint2rc &
+
+# Dock (bottom)
+plank &
+
+# Notifications
+dunst &
+
+# Network tray
+networkmgr &
+
+# Bluetooth
+blueman-applet &
+
+# Battery indicator (laptops)
+cbatticon &
+
+# Lock numlock
+numlockx on &
+
+# Start Openbox (blocking — session ends when this exits)
+exec openbox --config-file ~/.config/openbox/rc.xml

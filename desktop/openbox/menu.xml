@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu xmlns="http://openbox.org/3.4/menu">
+
+<menu id="root-menu" label="Desktop">
+
+  <item label="Spotlight Search">
+    <action name="Execute">
+      <command>rofi -show drun -theme ~/.config/rofi/macos.rasi</command>
+    </action>
+  </item>
+
+  <separator label="Applications"/>
+
+  <item label="Terminal">
+    <action name="Execute"><command>xfce4-terminal</command></action>
+  </item>
+  <item label="Files">
+    <action name="Execute"><command>thunar</command></action>
+  </item>
+  <item label="Text Editor">
+    <action name="Execute"><command>mousepad</command></action>
+  </item>
+  <item label="System Monitor">
+    <action name="Execute"><command>xfce4-terminal -e htop</command></action>
+  </item>
+
+  <separator label="Desktop"/>
+
+  <item label="Change Wallpaper">
+    <action name="Execute"><command>nitrogen</command></action>
+  </item>
+  <item label="Appearance">
+    <action name="Execute"><command>lxappearance</command></action>
+  </item>
+  <item label="Display Settings">
+    <action name="Execute"><command>arandr</command></action>
+  </item>
+
+  <separator/>
+
+  <menu id="power-menu" label="Power">
+    <item label="Lock Screen">
+      <action name="Execute"><command>xlock</command></action>
+    </item>
+    <item label="Restart Openbox">
+      <action name="Reconfigure"/>
+    </item>
+    <item label="Log Out">
+      <action name="Exit">
+        <prompt>yes</prompt>
+      </action>
+    </item>
+    <item label="Reboot">
+      <action name="Execute"><command>sudo shutdown -r now</command></action>
+    </item>
+    <item label="Shut Down">
+      <action name="Execute"><command>sudo shutdown -p now</command></action>
+    </item>
+  </menu>
+
+</menu>
+
+</openbox_menu>

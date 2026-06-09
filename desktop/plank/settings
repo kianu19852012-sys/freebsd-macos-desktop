@@ -1,0 +1,19 @@
+[PlankDockPreferences]
+# macOS-style dock — bottom center, zoom on hover, auto-hide
+CurrentWorkspaceOnly=false
+IconSize=52
+HideMode=1
+UnhideDelay=0
+HideDelay=600
+Monitor=-1
+LockPreventHiding=false
+Position=3
+Alignment=3
+Offset=0
+Theme=Transparent
+ShowPinnedOnly=false
+ZoomEnabled=true
+ZoomPercent=150
+PressureReveal=false
+ShowDockItem=false
+LockItems=false

@@ -1,0 +1,82 @@
+/* Rofi — Spotlight-style launcher for FreeBSD macOS Desktop */
+
+* {
+  font:             "Inter 13";
+  background-color: rgba(248, 248, 250, 0.88);
+  text-color:       #1c1c1e;
+  border-color:     rgba(0, 0, 0, 0.08);
+  accent:           #0071e3;
+}
+
+window {
+  width:            620px;
+  border-radius:    16px;
+  border:           1px solid rgba(0,0,0,0.08);
+  padding:          0px;
+  background-color: rgba(248, 248, 250, 0.88);
+  location:         center;
+  anchor:           center;
+  y-offset:         -80px;
+}
+
+mainbox {
+  padding:    12px;
+  spacing:    8px;
+}
+
+inputbar {
+  background-color: rgba(255,255,255,0.6);
+  border:           1px solid rgba(0,0,0,0.1);
+  border-radius:    10px;
+  padding:          10px 14px;
+  spacing:          8px;
+  children:         [ prompt, entry ];
+}
+
+prompt {
+  enabled:    false;
+}
+
+entry {
+  placeholder:       "Spotlight Search";
+  placeholder-color: #8e8e93;
+  text-color:        #1c1c1e;
+  cursor:            text;
+}
+
+listview {
+  lines:      8;
+  scrollbar:  false;
+  spacing:    2px;
+  padding:    4px 0px;
+}
+
+element {
+  padding:      9px 14px;
+  border-radius: 9px;
+  spacing:      10px;
+  orientation:  horizontal;
+}
+
+element-icon {
+  size:   24px;
+}
+
+element-text {
+  vertical-align: 0.5;
+}
+
+element normal.normal {
+  background-color: transparent;
+  text-color:       #1c1c1e;
+}
+
+element selected.normal {
+  background-color: #0071e3;
+  text-color:       white;
+}
+
+element alternate.normal {
+  background-color: transparent;
+  text-color:       #1c1c1e;
+}

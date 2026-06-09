@@ -1,0 +1,108 @@
+# FreeBSD packages for macOS-like desktop
+# Install with: pkg install -y $(grep -v '^#' packages.txt | tr '\n' ' ')
+
+# X11
+xorg-server
+xorg-minimal
+xorg-apps
+xinit
+xrandr
+xdpyinfo
+xset
+xrdb
+
+# Window Manager
+openbox
+obconf
+
+# Compositor
+picom
+
+# Dock
+plank
+
+# Top bar
+tint2
+
+# Launcher
+rofi
+
+# Wallpaper
+feh
+
+# GTK theming
+lxappearance
+gtk3
+gtk2
+adwaita-icon-theme
+
+# Qt theming (for Qt apps to match)
+qt5ct
+qt5-style-plugins
+
+# Display manager
+slim
+
+# Terminal
+xfce4-terminal
+
+# File manager
+thunar
+thunar-archive-plugin
+gvfs
+
+# Text editor
+mousepad
+
+# Screenshot
+xfce4-screenshooter
+
+# Notifications
+dunst
+libnotify
+
+# Audio
+pulseaudio
+pulseaudio-module-bluetooth
+pavucontrol
+alsa-utils
+
+# Bluetooth
+blueman
+
+# Network
+networkmgr
+wpa_supplicant
+
+# System tray utils
+network-mgr
+cbatticon
+
+# Fonts
+urwfonts
+webfonts
+dejavu
+
+# Utilities
+git
+curl
+wget
+bash
+unzip
+p7zip
+htop
+numlockx
+xdotool
+xclip
+arandr
+
+# ---- VM Guest Additions ----
+# VMware
+open-vm-tools
+xf86-video-vmware
+xf86-input-vmmouse
+# VirtualBox
+virtualbox-ose-additions
+# Virtio / SPICE
+xf86-video-qxl
+spice-vdagent

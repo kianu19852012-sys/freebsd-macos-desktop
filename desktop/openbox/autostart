@@ -1,0 +1,10 @@
+# Openbox autostart — sourced by openbox on session start
+# (xinitrc handles the main startup; this is a fallback)
+
+picom --config ~/.config/picom/picom.conf --daemon &
+feh --bg-scale ~/Pictures/Wallpapers/WhiteSur-light.jpg &
+tint2 -c ~/.config/tint2/macos.tint2rc &
+plank &
+dunst &
+networkmgr &
+numlockx on &

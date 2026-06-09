@@ -1,0 +1,82 @@
+#---- FreeBSD macOS-like Top Bar (Tint2) ----
+
+# Panel
+panel_monitor = all
+panel_position = top center horizontal
+panel_size = 100% 26
+panel_margin = 0 0
+panel_padding = 6 0 6
+panel_background_id = 1
+panel_dock = 0
+panel_layer = top
+wm_menu = 1
+taskbar_mode = single_desktop
+panel_items = TSC
+
+# Taskbar
+taskbar_padding = 2 0 2
+taskbar_background_id = 0
+taskbar_active_background_id = 0
+taskbar_name = 0
+taskbar_hide_inactive_tasks = 0
+taskbar_sort_order = none
+
+# Tasks
+task_icon = 1
+task_text = 1
+task_maximum_size = 160 22
+task_centered = 1
+task_padding = 4 2 4
+task_font = Inter 10
+task_font_color = #1c1c1e 100
+task_active_font_color = #1c1c1e 100
+task_urgent_font_color = #ff3b30 100
+task_background_id = 0
+task_active_background_id = 2
+task_urgent_background_id = 0
+task_iconified_background_id = 0
+urgent_nb_of_blink = 8
+task_icon_size = 14
+
+# System Tray
+systray_padding = 4 3 4
+systray_background_id = 0
+systray_sort = ascending
+systray_icon_size = 16
+systray_icon_asb = 100 0 0
+
+# Clock (right side — like macOS menu bar clock)
+time1_format = %H:%M
+time2_format = %a %b %-d
+time1_font = Inter Semi-Bold 11
+time2_font = Inter 9
+clock_font_color = #1c1c1e 100
+clock_padding = 6 2 6
+clock_background_id = 0
+clock_tooltip = %A, %B %-d, %Y
+clock_lclick_command = xcal 2>/dev/null || true
+
+# Backgrounds
+# [0] Transparent
+rounded = 0
+border_width = 0
+background_color = #000000 0
+border_color = #000000 0
+
+# [1] Panel background (frosted white)
+rounded = 0
+border_width = 0
+background_color = #f5f5f7 94
+border_color = #d1d1d6 60
+
+# [2] Active task
+rounded = 5
+border_width = 0
+background_color = rgba(0,0,0,0.08) 100
+border_color = #000000 0
+
+# [3] Urgent
+rounded = 5
+border_width = 0
+background_color = #ff3b30 100
+border_color = #ff3b30 100

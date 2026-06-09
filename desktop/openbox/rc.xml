@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_config xmlns="http://openbox.org/3.4/rc">
+
+  <theme>
+    <name>WhiteSur-Light</name>
+    <titleLayout>ILMC</titleLayout>
+    <keepBorder>yes</keepBorder>
+    <animateIconify>yes</animateIconify>
+    <font place="ActiveWindow">
+      <name>Inter</name>
+      <size>11</size>
+      <weight>Bold</weight>
+      <slant>Normal</slant>
+    </font>
+    <font place="InactiveWindow">
+      <name>Inter</name>
+      <size>11</size>
+      <weight>Normal</weight>
+    </font>
+    <font place="MenuHeader">
+      <name>Inter</name>
+      <size>11</size>
+      <weight>Bold</weight>
+    </font>
+    <font place="MenuItem">
+      <name>Inter</name>
+      <size>11</size>
+    </font>
+  </theme>
+
+  <desktops>
+    <number>4</number>
+    <firstdesk>1</firstdesk>
+    <names>
+      <name>Main</name>
+      <name>Work</name>
+      <name>Media</name>
+      <name>Extra</name>
+    </names>
+    <popupTime>875</popupTime>
+  </desktops>
+
+  <resize>
+    <drawContents>yes</drawContents>
+    <popupShow>Nonpixel</popupShow>
+  </resize>
+
+  <keyboard>
+    <!-- Spotlight launcher -->
+    <keybind key="Super_L">
+      <action name="Execute">
+        <command>rofi -show drun -theme ~/.config/rofi/macos.rasi</command>
+      </action>
+    </keybind>
+
+    <!-- Close window -->
+    <keybind key="super-q">
+      <action name="Close"/>
+    </keybind>
+
+    <!-- Minimize -->
+    <keybind key="super-m">
+      <action name="Iconify"/>
+    </keybind>
+
+    <!-- Maximize -->
+    <keybind key="super-ctrl-f">
+      <action name="ToggleMaximize"/>
+    </keybind>
+
+    <!-- Terminal -->
+    <keybind key="super-Return">
+      <action name="Execute">
+        <command>xfce4-terminal</command>
+      </action>
+    </keybind>
+
+    <!-- File manager -->
+    <keybind key="super-e">
+      <action name="Execute">
+        <command>thunar</command>
+      </action>
+    </keybind>
+
+    <!-- Screenshot -->
+    <keybind key="S-super-3">
+      <action name="Execute">
+        <command>xfce4-screenshooter -f</command>
+      </action>
+    </keybind>
+
+    <!-- Window screenshot -->
+    <keybind key="S-super-4">
+      <action name="Execute">
+        <command>xfce4-screenshooter -w</command>
+      </action>
+    </keybind>
+
+    <!-- Switch windows (Exposé-style via rofi) -->
+    <keybind key="super-Tab">
+      <action name="NextWindow">
+        <finalactions>
+          <action name="Focus"/>
+          <action name="Raise"/>
+          <action name="Unshade"/>
+        </finalactions>
+      </action>
+    </keybind>
+
+    <!-- Switch windows reverse -->
+    <keybind key="super-S-Tab">
+      <action name="PreviousWindow">
+        <finalactions>
+          <action name="Focus"/>
+          <action name="Raise"/>
+          <action name="Unshade"/>
+        </finalactions>
+      </action>
+    </keybind>
+
+    <!-- Move window with keyboard -->
+    <keybind key="super-Left">
+      <action name="MoveResizeTo">
+        <x>0</x><y>26</y>
+        <width>50%</width><height>100%</height>
+      </action>
+    </keybind>
+    <keybind key="super-Right">
+      <action name="MoveResizeTo">
+        <x>50%</x><y>26</y>
+        <width>50%</width><height>100%</height>
+      </action>
+    </keybind>
+
+    <!-- Volume keys -->
+    <keybind key="XF86AudioRaiseVolume">
+      <action name="Execute">
+        <command>pactl set-sink-volume @DEFAULT_SINK@ +5%</command>
+      </action>
+    </keybind>
+    <keybind key="XF86AudioLowerVolume">
+      <action name="Execute">
+        <command>pactl set-sink-volume @DEFAULT_SINK@ -5%</command>
+      </action>
+    </keybind>
+    <keybind key="XF86AudioMute">
+      <action name="Execute">
+        <command>pactl set-sink-mute @DEFAULT_SINK@ toggle</command>
+      </action>
+    </keybind>
+
+    <!-- Brightness keys (laptop) -->
+    <keybind key="XF86MonBrightnessUp">
+      <action name="Execute">
+        <command>xbacklight -inc 10</command>
+      </action>
+    </keybind>
+    <keybind key="XF86MonBrightnessDown">
+      <action name="Execute">
+        <command>xbacklight -dec 10</command>
+      </action>
+    </keybind>
+  </keyboard>
+
+  <mouse>
+    <dragThreshold>1</dragThreshold>
+    <doubleClickTime>200</doubleClickTime>
+    <screenEdgeWarpTime>0</screenEdgeWarpTime>
+    <screenEdgeWarpMouse>false</screenEdgeWarpMouse>
+  </mouse>
+
+  <applications>
+    <!-- Plank dock — no decorations -->
+    <application class="Plank">
+      <decor>no</decor>
+      <focus>no</focus>
+      <layer>above</layer>
+      <skip_taskbar>yes</skip_taskbar>
+      <skip_pager>yes</skip_pager>
+    </application>
+    <!-- Tint2 bar — no decorations -->
+    <application class="Tint2">
+      <decor>no</decor>
+      <focus>no</focus>
+      <layer>above</layer>
+    </application>
+  </applications>
+
+</openbox_config>
