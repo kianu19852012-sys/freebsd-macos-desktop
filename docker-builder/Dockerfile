@@ -3,48 +3,48 @@
 #  Base: Debian Bookworm (slim) + cross-build tools
 #  Produces: freebsd-macos-desktop.iso (~900MB)
 #
-#  Usage:
-#    docker build -t fbsd-iso-builder .
-#    docker run --rm -v $(pwd)/output:/output fbsd-iso-builder
+#  MUST be built from the PROJECT ROOT (freebsd-macos/):
+#    cd freebsd-macos
+#    docker build -f docker-builder/Dockerfile -t fbsd-iso-builder .
+#    docker run --rm -v $(pwd)/docker-builder/output:/output fbsd-iso-builder
+#
+#  Or just use docker-compose from docker-builder/:
+#    cd docker-builder && docker compose up --build
 # ============================================================
 
 FROM debian:bookworm-slim
 
 LABEL description="FreeBSD macOS Desktop ISO Builder"
-LABEL version="1.0"
+LABEL version="1.1"
+
+ARG FREEBSD_VERSION=14.0
+ENV FREEBSD_VERSION=${FREEBSD_VERSION}
 
 # ---- Build tools ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Download tools
     curl wget ca-certificates \
-    # Archive tools
     xz-utils bzip2 unzip zip \
-    # ISO creation
     xorriso grub-pc-bin grub-efi-amd64-bin mtools \
-    # Font tools
     fontforge python3-fontforge \
-    # Image tools
     python3 python3-pip python3-pil \
-    # Git (for theme cloning)
     git \
-    # Misc
     cpio gawk sed grep findutils \
     && rm -rf /var/lib/apt/lists/*
 
 # ---- Python deps ----
 RUN pip3 install Pillow --break-system-packages
 
-# ---- Set up build directory ----
 WORKDIR /build
 
-# ---- Copy our project files into the image ----
+# ---- Copy entire project into /build/freebsd-macos ----
+# Build context = freebsd-macos/ (project root)
 COPY . /build/freebsd-macos/
 
-# ---- Copy the build script ----
-COPY docker-build.sh /build/docker-build.sh
-RUN chmod +x /build/docker-build.sh
+# ---- Hoist the build script to /build ----
+RUN cp /build/freebsd-macos/docker-builder/docker-build.sh /build/docker-build.sh && \
+    chmod +x /build/docker-build.sh
 
-# ---- Output volume mount point ----
+# ---- Output volume ----
 VOLUME ["/output"]
 
 ENTRYPOINT ["/build/docker-build.sh"]

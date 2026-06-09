@@ -1,0 +1,9 @@
+docker-builder/output/
+docker-builder/cache/
+**/*.iso
+**/*.zip
+**/__pycache__/
+**/*.pyc
+.git/
+.github/
+*.zip
