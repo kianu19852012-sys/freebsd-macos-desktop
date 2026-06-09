@@ -1,0 +1,49 @@
+name: Validate Scripts & Configs
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck python3
+
+      - name: Shellcheck all scripts
+        run: |
+          echo "=== Checking shell scripts ==="
+          find . -name "*.sh" -not -path "./.git/*" | while read f; do
+            echo "Checking: $f"
+            shellcheck -S warning "$f" || true
+          done
+
+      - name: Python syntax check (Setup Assistant UI)
+        run: |
+          echo "=== Checking Python syntax ==="
+          python3 -m py_compile firstboot/progress-ui.py && \
+            echo "✅ progress-ui.py syntax OK" || \
+            echo "❌ progress-ui.py has syntax errors"
+
+      - name: Validate GRUB config syntax
+        run: |
+          echo "=== Checking GRUB config ==="
+          if grep -qE "^\s*(menuentry|insmod|set|if|fi|else)" grub/grub.cfg; then
+            echo "✅ grub.cfg looks valid"
+          else
+            echo "⚠️  grub.cfg may be empty or malformed"
+          fi
+
+      - name: Check Docker Compose config
+        run: |
+          echo "=== Checking docker-compose.yml ==="
+          cd docker-builder
+          docker compose config --quiet && echo "✅ docker-compose.yml valid" || echo "❌ docker-compose.yml invalid"

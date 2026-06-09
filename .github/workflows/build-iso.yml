@@ -1,0 +1,154 @@
+name: Build FreeBSD macOS Desktop ISO
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docker-builder/**'
+      - 'firstboot/**'
+      - 'desktop/**'
+      - 'grub/**'
+      - 'drivers/**'
+      - 'base/**'
+      - '.github/workflows/build-iso.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      freebsd_version:
+        description: 'FreeBSD version to build'
+        required: false
+        default: '14.0'
+      upload_release:
+        description: 'Create a GitHub Release with the ISO'
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  build:
+    name: Build ISO
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      # --------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --------------------------------------------------------
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # --------------------------------------------------------
+      - name: Cache FreeBSD base sets
+        uses: actions/cache@v4
+        with:
+          path: freebsd-macos/docker-builder/cache
+          key: freebsd-${{ github.event.inputs.freebsd_version || '14.0' }}-base-sets
+          restore-keys: |
+            freebsd-${{ github.event.inputs.freebsd_version || '14.0' }}-base-sets
+
+      # --------------------------------------------------------
+      - name: Prepare output & cache dirs
+        run: |
+          mkdir -p freebsd-macos/docker-builder/output
+          mkdir -p freebsd-macos/docker-builder/cache
+
+      # --------------------------------------------------------
+      - name: Build Docker image
+        run: |
+          cd freebsd-macos/docker-builder
+          docker build \
+            --build-arg FREEBSD_VERSION=${{ github.event.inputs.freebsd_version || '14.0' }} \
+            -t fbsd-iso-builder:latest \
+            --cache-from type=gha \
+            --cache-to   type=gha,mode=max \
+            .
+
+      # --------------------------------------------------------
+      - name: Build ISO
+        run: |
+          cd freebsd-macos/docker-builder
+          docker run --rm \
+            -v "$(pwd)/output:/output" \
+            -v "$(pwd)/cache:/build/dists" \
+            -e FREEBSD_VERSION=${{ github.event.inputs.freebsd_version || '14.0' }} \
+            fbsd-iso-builder:latest
+
+      # --------------------------------------------------------
+      - name: Verify ISO
+        run: |
+          ISO="freebsd-macos/docker-builder/output/freebsd-macos-desktop.iso"
+          if [ ! -f "$ISO" ]; then
+            echo "❌ ISO not found at $ISO"
+            exit 1
+          fi
+          SIZE=$(du -sh "$ISO" | cut -f1)
+          SHA=$(sha256sum "$ISO" | cut -d' ' -f1)
+          echo "✅ ISO built successfully"
+          echo "   Size:   $SIZE"
+          echo "   SHA256: $SHA"
+          echo "ISO_SIZE=$SIZE"    >> $GITHUB_ENV
+          echo "ISO_SHA=$SHA"      >> $GITHUB_ENV
+          echo "ISO_PATH=$ISO"     >> $GITHUB_ENV
+
+      # --------------------------------------------------------
+      - name: Upload ISO as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: freebsd-macos-desktop-iso
+          path: freebsd-macos/docker-builder/output/freebsd-macos-desktop.iso
+          retention-days: 7
+          compression-level: 0   # ISO is already compressed
+
+      # --------------------------------------------------------
+      - name: Create GitHub Release
+        if: |
+          github.event_name == 'push' && github.ref == 'refs/heads/main' ||
+          github.event.inputs.upload_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: "FreeBSD macOS Desktop — Build #${{ github.run_number }}"
+          body: |
+            ## FreeBSD macOS Desktop — Automated Build
+
+            **Build:** #${{ github.run_number }}
+            **Commit:** ${{ github.sha }}
+            **Date:** ${{ github.event.head_commit.timestamp }}
+
+            ### ISO Details
+            - **Size:** ${{ env.ISO_SIZE }}
+            - **SHA256:** `${{ env.ISO_SHA }}`
+            - **FreeBSD base:** ${{ github.event.inputs.freebsd_version || '14.0' }}-RELEASE
+
+            ### What's included
+            - 4-screen Setup Assistant (Account → Timezone/Locale → Disk → Install)
+            - WhiteSur macOS Sonoma theme on Openbox + Plank + Tint2 + Rofi
+            - Custom macOS-style GRUB bootloader
+            - Intel GPU + WiFi drivers
+            - VMware / VirtualBox / QEMU auto-detection
+            - ZFS / UFS / alongside / manual partition schemes
+
+            ### How to test
+            ```bash
+            # Linux (KVM)
+            qemu-system-x86_64 -m 4G -smp 4 -cdrom freebsd-macos-desktop.iso \
+              -boot d -enable-kvm -cpu host -vga qxl -display sdl
+
+            # macOS (HVF)
+            qemu-system-x86_64 -m 4G -smp 4 -cdrom freebsd-macos-desktop.iso \
+              -boot d -accel hvf -cpu host -vga virtio -display cocoa
+            ```
+
+            ### VMware settings
+            - Guest OS: FreeBSD 14 64-bit
+            - Firmware: UEFI
+            - RAM: 4 GB+, Disk: 40 GB+
+            - Enable "Accelerate 3D graphics"
+          files: freebsd-macos/docker-builder/output/freebsd-macos-desktop.iso
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
