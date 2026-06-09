@@ -15,20 +15,22 @@
 FROM debian:bookworm-slim
 
 LABEL description="FreeBSD macOS Desktop ISO Builder"
-LABEL version="1.1"
+LABEL version="1.2"
 
-ARG FREEBSD_VERSION=14.0
+ARG FREEBSD_VERSION=14.3
 ENV FREEBSD_VERSION=${FREEBSD_VERSION}
 
 # ---- Build tools ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl wget ca-certificates \
     xz-utils bzip2 unzip zip \
-    xorriso grub-pc-bin grub-efi-amd64-bin mtools \
+    xorriso grub-pc-bin grub-efi-amd64-bin \
+    mtools dosfstools \
     fontforge python3-fontforge \
     python3 python3-pip python3-pil \
     git \
     cpio gawk sed grep findutils \
+    coreutils util-linux \
     && rm -rf /var/lib/apt/lists/*
 
 # ---- Python deps ----
