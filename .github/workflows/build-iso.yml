@@ -25,6 +25,10 @@ on:
         required: false
         default: false
 
+# Grant write access so GITHUB_TOKEN can create releases
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build ISO
