@@ -18,7 +18,7 @@ on:
       freebsd_version:
         description: 'FreeBSD version to build'
         required: false
-        default: '14.0'
+        default: '14.3'
       upload_release:
         description: 'Create a GitHub Release with the ISO'
         type: boolean
@@ -45,9 +45,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: docker-builder/cache
-          key: freebsd-${{ github.event.inputs.freebsd_version || '14.0' }}-base-sets
+          key: freebsd-${{ github.event.inputs.freebsd_version || '14.3' }}-base-sets
           restore-keys: |
-            freebsd-${{ github.event.inputs.freebsd_version || '14.0' }}-base-sets
+            freebsd-${{ github.event.inputs.freebsd_version || '14.3' }}-base-sets
 
       # --------------------------------------------------------
       - name: Prepare output & cache dirs
@@ -59,10 +59,10 @@ jobs:
       - name: Build ISO
         working-directory: docker-builder
         run: |
-          FREEBSD_VERSION=${{ github.event.inputs.freebsd_version || '14.0' }} \
+          FREEBSD_VERSION=${{ github.event.inputs.freebsd_version || '14.3' }} \
           docker compose up --build --abort-on-container-exit
         env:
-          FREEBSD_VERSION: ${{ github.event.inputs.freebsd_version || '14.0' }}
+          FREEBSD_VERSION: ${{ github.event.inputs.freebsd_version || '14.3' }}
 
       # --------------------------------------------------------
       - name: Verify ISO
@@ -107,7 +107,7 @@ jobs:
             ### ISO Details
             - **Size:** ${{ env.ISO_SIZE }}
             - **SHA256:** `${{ env.ISO_SHA }}`
-            - **FreeBSD base:** ${{ github.event.inputs.freebsd_version || '14.0' }}-RELEASE
+            - **FreeBSD base:** ${{ github.event.inputs.freebsd_version || '14.3' }}-RELEASE
 
             ### What's included
             - 4-screen Setup Assistant (Account → Timezone/Locale → Disk → Install)

@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-FREEBSD_VERSION="14.0"
+FREEBSD_VERSION="${FREEBSD_VERSION:-14.3}"
 FREEBSD_ARCH="amd64"
 FREEBSD_MIRROR="https://download.freebsd.org/releases/${FREEBSD_ARCH}/${FREEBSD_VERSION}-RELEASE"
 BUILD="/build"
@@ -39,15 +39,46 @@ mkdir -p "$WORK" "$DIST" "$ROOTFS" "$ISO_ROOT" "$OUTPUT"
 # ============================================================
 log "Step 1/7 — Downloading FreeBSD ${FREEBSD_VERSION} base sets..."
 
-for dist in base.txz kernel.txz lib32.txz; do
-    if [ ! -f "$DIST/$dist" ]; then
-        log "  Fetching $dist (~$([ $dist = base.txz ] && echo '170MB' || echo '$([ $dist = kernel.txz ] && echo 40MB || echo 25MB)'))..."
-        curl -# -o "$DIST/$dist" "$FREEBSD_MIRROR/$dist" || \
-            wget -q --show-progress -O "$DIST/$dist" "$FREEBSD_MIRROR/$dist"
-        ok "  $dist downloaded"
-    else
-        ok "  $dist already cached"
+MIRRORS=(
+    "https://download.freebsd.org/releases/${FREEBSD_ARCH}/${FREEBSD_VERSION}-RELEASE"
+    "https://ftp.freebsd.org/pub/FreeBSD/releases/${FREEBSD_ARCH}/${FREEBSD_VERSION}-RELEASE"
+    "https://ftp2.freebsd.org/pub/FreeBSD/releases/${FREEBSD_ARCH}/${FREEBSD_VERSION}-RELEASE"
+)
+
+download_dist() {
+    local dist="$1"
+    local dest="$DIST/$dist"
+
+    # Check if already cached and valid (> 10MB)
+    if [ -f "$dest" ]; then
+        FSIZE=$(stat -c%s "$dest" 2>/dev/null || echo 0)
+        if [ "$FSIZE" -gt 10485760 ]; then
+            ok "  $dist already cached ($(numfmt --to=iec $FSIZE))"
+            return 0
+        else
+            warn "  $dist cached but too small (${FSIZE} bytes) — re-downloading..."
+            rm -f "$dest"
+        fi
     fi
+
+    for mirror in "${MIRRORS[@]}"; do
+        log "  Fetching $dist from $mirror ..."
+        if curl -fL# -o "$dest" "$mirror/$dist" 2>&1; then
+            FSIZE=$(stat -c%s "$dest" 2>/dev/null || echo 0)
+            if [ "$FSIZE" -gt 10485760 ]; then
+                ok "  $dist downloaded ($(numfmt --to=iec $FSIZE))"
+                return 0
+            else
+                warn "  Got $dist but too small (${FSIZE} bytes) — trying next mirror..."
+                rm -f "$dest"
+            fi
+        fi
+    done
+    die "All mirrors failed for $dist"
+}
+
+for dist in base.txz kernel.txz lib32.txz; do
+    download_dist "$dist"
 done
 
 # ============================================================
@@ -56,15 +87,6 @@ done
 log "Step 2/7 — Extracting FreeBSD base into rootfs..."
 for dist in base.txz lib32.txz kernel.txz; do
     log "  Extracting $dist..."
-    # Validate file size — re-download if empty/corrupt
-    FSIZE=$(stat -c%s "$DIST/$dist" 2>/dev/null || echo 0)
-    if [ "$FSIZE" -lt 1048576 ]; then
-        warn "  $dist seems corrupt (${FSIZE} bytes) — re-downloading..."
-        rm -f "$DIST/$dist"
-        curl -# -o "$DIST/$dist" "$FREEBSD_MIRROR/$dist" || \
-            wget -q --show-progress -O "$DIST/$dist" "$FREEBSD_MIRROR/$dist" || \
-            die "Failed to download $dist"
-    fi
     tar -xJf "$DIST/$dist" -C "$ROOTFS" --no-same-owner || die "Failed to extract $dist"
 done
 # Verify rootfs has essential dirs
